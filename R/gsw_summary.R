@@ -8,10 +8,10 @@
 #' gsw_summary("Lyon",conn)
 gsw_summary=function(city,conn){
   thisCityCode=glourbi::all_cities %>%
-    filter(Urban.Aggl==city) %>%
-    pull(ID)
+    dplyr::filter(Urban.Aggl==city) %>%
+    dplyr::pull(ID)
   result=DBI::dbReadTable(conn,"gsw_summary") %>%
-    filter(citycode==thisCityCode)
+    dplyr::filter(citycode==thisCityCode)
   return(result)
 }
 
