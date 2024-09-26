@@ -8,10 +8,10 @@
 #' gsw_summary("Lyon",conn)
 gsw_summary=function(city,conn){
   thisCityCode=glourbi::all_cities %>%
-    filter(Urban.Aggl==city) %>%
-    pull(ID)
+    dplyr::filter(Urban.Aggl==city) %>%
+    dplyr::pull(ID)
   result=DBI::dbReadTable(conn,"gsw_summary") %>%
-    filter(citycode==thisCityCode)
+    dplyr::filter(citycode==thisCityCode)
   return(result)
 }
 
@@ -20,10 +20,10 @@ gsw_summary=function(city,conn){
 #' @return a table with gsw_pixels results for the city
 #' @export
 gsw_summary_plot=function(gws_summary_result){
-  result_summary=result %>%
+  result_summary=gws_summary_result %>%
     dplyr::group_by(reach,zone) %>%
     dplyr::summarise(propwater=unique(propwater))
-  plot=ggplot2::ggplot(result,
+  plot=ggplot2::ggplot(gws_summary_result,
                        ggplot2::aes(x=dir_change,y=forcats::fct_reorder(type_change,cat_entropy)))+
     ggplot2::geom_point(aes(size=n*100,col=as.factor(dir_change)))+
     ggplot2::geom_point(data=result %>% dplyr::filter(main==TRUE),
