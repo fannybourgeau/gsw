@@ -27,7 +27,7 @@ gsw_summary_plot=function(gws_summary_result){
     dplyr::summarise(propwater=unique(propwater))
   plot=ggplot2::ggplot(gws_summary_result,
                        ggplot2::aes(x=dir_change,y=forcats::fct_reorder(type_change,cat_entropy)))+
-    ggplot2::geom_point(aes(size=n*100,col=as.factor(dir_change)))+
+    ggplot2::geom_point(ggplot2::aes(size=n*100,col=as.factor(dir_change)))+
     ggplot2::geom_point(data=result %>% dplyr::filter(main==TRUE),
                         stroke=1,col="black",shape=21, ggplot2::aes(size=n*100))+
     ggplot2::geom_rect(data=result_by_reach_zone,
