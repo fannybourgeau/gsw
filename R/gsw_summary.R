@@ -13,7 +13,10 @@ gsw_summary=function(city,conn){
   result=DBI::dbReadTable(conn,"gsw_summary") %>%
     dplyr::filter(citycode==thisCityCode) %>% 
     dplyr::mutate(city=city) %>% 
-    dplyr::mutate(reach=factor(reach,levels=c("upstream","city","downstream")))
+    dplyr::mutate(reach=factor(reach,levels=c("upstream","city","downstream"))) %>% 
+    dplyr::group_by(reach,zone) %>% 
+    dplyr::mutate(main=n==max(n)) %>% 
+    dplyr::ungroup()
   return(result)
 }
 
