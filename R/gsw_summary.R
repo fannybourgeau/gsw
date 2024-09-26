@@ -28,7 +28,7 @@ gsw_summary_plot=function(gws_summary_result){
   plot=ggplot2::ggplot(gws_summary_result,
                        ggplot2::aes(x=dir_change,y=forcats::fct_reorder(type_change,cat_entropy)))+
     ggplot2::geom_point(ggplot2::aes(size=n*100,col=as.factor(dir_change)))+
-    ggplot2::geom_point(data=result %>% dplyr::filter(main==TRUE),
+    ggplot2::geom_point(data=gws_summary_result %>% dplyr::filter(main==TRUE),
                         stroke=1,col="black",shape=21, ggplot2::aes(size=n*100))+
     ggplot2::geom_rect(data=result_by_reach_zone,
                        ggplot2::aes(x=4,y=1,xmin=4,xmax=4.5, ymin=1,ymax=3),
