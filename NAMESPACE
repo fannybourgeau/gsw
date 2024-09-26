@@ -1,0 +1,6 @@
+export(append_to_table_gsw_pixels)
+export(append_to_table_gsw_summary)
+export(gsw_extract_pixels)
+export(gsw_summarise)
+export(gsw_summary)
+export(gsw_summary_plot)

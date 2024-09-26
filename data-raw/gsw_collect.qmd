@@ -1,0 +1,96 @@
+---
+title: "GWS_signature"
+format: html
+editor: visual
+---
+
+This document explains how we extract data from the **Global Surface Water** for each of our **300 cities of #sample1 for project GloUrb**.
+
+We first start by loading a few packages and the **study areas of each city** (polygons for each relevant combination of **reach** -upstream/city/downstream- and **area** -plain/corridor)
+
+```{r setup}
+library(tidyverse)
+library(terra)
+library(DBI)
+library(sf)
+
+study_areas_glob=sf::st_read("../../glosmurb_collect/data/study_area_global.shp")
+study_areas=sf::st_read("../../glosmurb_collect/data/StudyArea_reach_zone.shp") %>% 
+  mutate(CityCode=case_when(CityCode=="N262778_22318"~"262778_22318",
+                            TRUE~CityCode)) %>% 
+  filter(CityCode %in% study_areas_glob$CityCode)
+
+# Function used to establish connection to the SandBox DataBase
+conn=glourbi::connect_to_sandbox()
+```
+
+# Extract values for one city
+
+The following function has city code as input value and extracts **1000 meaningul values of change and entropy** for each **area x zone** polygon of the city.
+
+The .tif images documenting GWS change intensity and the entropy (kernel 9) of the change are **extracted beforehand** based on a Python / **Google Earth Engine** script and gathered here in a file "images".
+
+Run on one city and have a look at result
+
+```{r example_extract_city_gsw, message=FALSE, warning=FALSE}
+result=gsw::gsw_extract_pixels(thisCityCode="595123_20865")
+result %>% 
+  group_by(reach,zone,n) %>% 
+  summarise(change=mean(change),entropy=mean(entropy))
+```
+
+# Add these results iteratively to a "gsw" table in the SandBox database
+
+```{r run_append_to_table_gsw, message=FALSE, warning=FALSE}
+citycodes=study_areas$CityCode %>% unique()
+# purrr::map(citycodes,append_to_table_gsw_pixels, conn=conn)
+```
+
+## calculate average entropy on all cities-zones-reaches
+
+```{r}
+my_average_entropy=tbl(conn,"gsw_pixels") %>% 
+  summarise(average_entropy=mean(entropy)) %>% 
+  pull(average_entropy)
+```
+
+# gsw summary
+
+## Get summary results by city
+
+```{r gsw_summarise}
+gsw::gsw_summarise("2496089_20362",average_entropy=my_average_entropy)
+```
+
+```{r run_append_to_table_gws_summary, message=FALSE, warning=FALSE}
+citycodes=study_areas$CityCode %>% unique()
+purrr::map(citycodes,gsw::append_to_table_gsw_summary, conn=conn)
+```
+
+
+## Plot results by city
+
+# Test on known cities
+
+```{r}
+gsw_summary_plot(gsw_summary("Agartala",conn)) 
+gsw_summary_plot(gsw_summary("Kut",conn))
+gsw_summary_plot(gsw_summary("Rosario",conn))
+gsw_summary_plot(gsw_summary("Patna",conn))
+gsw_summary_plot(gsw_summary("Al-Mawsil (Mosul)",conn)) 
+gsw_summary_plot(gsw_summary("Ahmadabad",conn))
+gsw_summary_plot(gsw_summary("Posadas",conn)) 
+gsw_summary_plot(gsw_summary("Denver-Aurora",conn))
+gsw_summary_plot(gsw_summary("Ji'nan, Shandong",conn))
+gsw_summary_plot(gsw_summary("Sacramento",conn))
+gsw_summary_plot(gsw_summary("Patna",conn))
+gsw_summary_plot(gsw_summary("Grenoble",conn))
+gsw_summary_plot(gsw_summary("Lyon",conn))
+gsw_summary_plot(gsw_summary("Lop Buri",conn))
+```
+
+# Disconnect from database 
+
+```{r}
+DBI::dbDisconnect(conn)
+```
