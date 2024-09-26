@@ -20,7 +20,7 @@ gsw_summary=function(city,conn){
 #' @return a table with gsw_pixels results for the city
 #' @export
 gsw_summary_plot=function(gws_summary_result){
-  result_summary=gws_summary_result %>%
+  result_by_reach_zone=gws_summary_result %>%
     dplyr::group_by(reach,zone) %>%
     dplyr::summarise(propwater=unique(propwater))
   plot=ggplot2::ggplot(gws_summary_result,
@@ -28,10 +28,10 @@ gsw_summary_plot=function(gws_summary_result){
     ggplot2::geom_point(aes(size=n*100,col=as.factor(dir_change)))+
     ggplot2::geom_point(data=result %>% dplyr::filter(main==TRUE),
                         stroke=1,col="black",shape=21, aes(size=n*100))+
-    ggplot2::geom_rect(data=result_summary,
+    ggplot2::geom_rect(data=result_by_reach_zone,
                        ggplot2::aes(x=4,y=1,xmin=4,xmax=4.5, ymin=1,ymax=3),
                        fill="white",stat="identity",color="black")+
-    ggplot2::geom_rect(data=result_summary ,
+    ggplot2::geom_rect(data=result_by_reach_zone ,
                        ggplot2::aes(x=4,y=1,xmin=4,xmax=4.5, ymin=1,ymax=1+2*propwater),
                        fill="lightblue",stat="identity",color="black")+
     ggplot2::scale_size(range = c(0, 30))+
