@@ -67,7 +67,6 @@ citycodes=study_areas$CityCode %>% unique()
 purrr::map(citycodes,gsw::append_to_table_gsw_summary, conn=conn)
 ```
 
-
 ## Plot results by city
 
 # Test on known cities
@@ -89,7 +88,7 @@ gsw_summary_plot(gsw_summary("Lyon",conn))
 gsw_summary_plot(gsw_summary("Lop Buri",conn))
 ```
 
-# Disconnect from database 
+# Disconnect from database
 
 ```{r}
 DBI::dbDisconnect(conn)
