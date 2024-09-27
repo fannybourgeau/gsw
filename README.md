@@ -1,6 +1,8 @@
+<<<<<<< HEAD
 # Package gsw 
 
 *Use GSW change intensity data to extract metrics for each city in GloUrb's sample1*
+
 
 The gsw package gathers functions used to extract metrics from GSW change intensity data.
 
