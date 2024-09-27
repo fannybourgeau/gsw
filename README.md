@@ -2,6 +2,7 @@
 
 *Use GSW change intensity data to extract metrics for each city in GloUrb's sample1*
 
+
 The gsw package gathers functions used to extract metrics from GSW change intensity data.
 
 - **gws_extract_pixels()** extracts 1000 pixels of GSW change intensity per zone x reach polygon for a city
