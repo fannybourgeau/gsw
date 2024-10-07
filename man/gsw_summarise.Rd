@@ -4,7 +4,7 @@
 \alias{gsw_summarise}
 \title{Summarise results from the 1000 pixels randomly extracted for each zone x reach of a particular city}
 \usage{
-gsw_summarise(thisCityCode, average_entropy)
+gsw_summarise(thisCityCode, average_entropy, conn)
 }
 \arguments{
 \item{thisCityCode}{citycode}

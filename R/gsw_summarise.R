@@ -3,9 +3,10 @@
 #' @param average_entropy the average entropy (above which entropy is considered high i.e. change is considered diffuse).
 #' @return a message
 #' @export
-gsw_summarise=function(thisCityCode, average_entropy){
-  result_pix=tbl(conn,"gsw_pixels") %>%
-    filter(citycode==thisCityCode) %>%
+gsw_summarise=function(thisCityCode, average_entropy,conn){
+  result_pix=glourbi::get_city_sf("gsw_pixels",
+                                  thisCityCode,
+                                  conn=conn) %>%
     as_tibble()
   result=result_pix %>%
     group_by(reach,zone,area_pol,area_intersect) %>%

@@ -17,3 +17,7 @@ a table with gsw_summary results for the city
 \description{
 Extract 1000 pixels of GSW change intensity per zone x reach polygon for a city
 }
+\examples{
+conn=glourbi::connection_to_sandbox()
+gsw_summary("Lyon",conn)
+}

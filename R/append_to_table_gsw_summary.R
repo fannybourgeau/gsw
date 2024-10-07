@@ -18,22 +18,19 @@ append_to_table_gsw_summary <- function(CityCode,
      dir_change VARCHAR(255),
      type_change VARCHAR(255),
      type VARCHAR(255),
-<<<<<<< HEAD
-=======
      n INTEGER,
->>>>>>> c34db57 (first commit)
      propwater double precision
     );"
     DBI::dbExecute(conn,query)
   }
 
-  if(DBI::dbExistsTable(conn, "gws_summary")){
+  if(DBI::dbExistsTable(conn, "gsw_summary")){
     # Check if city has already been added
     query = glue::glue("SELECT * FROM public.gsw_summary WHERE citycode = '{CityCode}';")
     result= DBI::dbGetQuery(conn, query)
     if(nrow(result)>0){return()}
   }
-  result=gsw_summarise(CityCode,average_entropy=my_average_entropy)
+  result=gsw_summarise(CityCode,average_entropy=my_average_entropy, conn=conn)
   DBI::dbWriteTable(conn,name="gsw_summary", value=result, append=TRUE)
   return(glue::glue("Added data to table gsw_summary for city {CityCode}"))
 }

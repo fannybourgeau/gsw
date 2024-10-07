@@ -1,5 +1,5 @@
 ---
-title: "GWS_signature"
+title: "GSW_signature"
 format: html
 editor: visual
 ---
@@ -21,14 +21,14 @@ study_areas=sf::st_read("../../glosmurb_collect/data/StudyArea_reach_zone.shp") 
   filter(CityCode %in% study_areas_glob$CityCode)
 
 # Function used to establish connection to the SandBox DataBase
-conn=glourbi::connect_to_sandbox()
+#conn=glourbi::connect_to_sandbox()
 ```
 
 # Extract values for one city
 
-The following function has city code as input value and extracts **1000 meaningul values of change and entropy** for each **area x zone** polygon of the city.
+The following function has city code as input value and extracts **1000 meaningful values of change and entropy** for each **area x zone** polygon of the city.
 
-The .tif images documenting GWS change intensity and the entropy (kernel 9) of the change are **extracted beforehand** based on a Python / **Google Earth Engine** script and gathered here in a file "images".
+The .tif images documenting GSW change intensity and the entropy (kernel 9) of the change are **extracted beforehand** based on a Python / **Google Earth Engine** script and gathered here in a file "images".
 
 Run on one city and have a look at result
 
@@ -92,4 +92,83 @@ gsw_summary_plot(gsw_summary("Lop Buri",conn))
 
 ```{r}
 DBI::dbDisconnect(conn)
+```
+
+# Patches
+
+```{r}
+conn=glourbi::connect_to_glourb()
+citycodes=study_areas$CityCode %>% unique()
+dbGetQuery(conn,"SELECT COUNT(DISTINCT citycode) AS unique_citycode_count FROM gsw_patches;")
+#   
+# for (i in 1:length(citycodes)){
+#   print(i)
+#     result=gsw::gsw_extract_pixels_patches(citycodes[i],study_areas) %>% 
+#       mutate(citycode=citycodes[i]) %>% 
+#       select(citycode,everything())
+#     gsw::append_to_table(result,
+#                 "gsw_patches",
+#                 CityCode=citycodes[i],
+#                 conn=conn)
+# }
+```
+
+
+
+```{r}
+conn=glourbi::connect_to_glourb()
+dbGetQuery(conn,"SELECT COUNT(DISTINCT citycode) AS unique_citycode_count FROM gsw_patches_summary;")
+citycodes=study_areas$CityCode %>% unique()
+# for (i in 1:length(citycodes)){
+#   print(i)
+#     result=gsw::gsw_summarise_patches(citycodes[i],study_areas) %>%
+#       mutate(citycode=citycodes[i]) %>%
+#       select(citycode,everything())
+#     gsw::append_to_table(result,
+#                 "gsw_patches_summary",
+#                 CityCode=citycodes[i],
+#                 conn=conn)
+# }
+```
+
+```{r}
+tib=DBI::dbReadTable(conn,"gsw_patches_polygons") %>%
+    dplyr::filter(citycode==thisCityCode) %>% 
+  select(-geometry) %>% 
+  as_tibble()
+result=tib %>%
+         dplyr::mutate(reach=factor(reach, levels=c("upstream","city","downstream"))) %>% 
+  mutate(IDrow=1:n())
+
+result1=result %>% select(IDrow,starts_with("ntype")) %>% 
+  tidyr::pivot_longer(cols=starts_with("ntype_"),names_to="type",values_to="ntype",names_prefix="ntype_") 
+result2=result %>% select(IDrow,starts_with("meantype")) %>% 
+  tidyr::pivot_longer(cols=starts_with("meantype_"),names_to="type",values_to="meantype",names_prefix="meantype_")
+result3=result %>% select(IDrow,starts_with("variability")) %>% 
+  tidyr::pivot_longer(cols=starts_with("variability_"),names_to="type",values_to="variability",names_prefix="variability_")
+result=result %>% 
+  select(-starts_with("ntype_"),
+         -starts_with("meantype_"),
+         -starts_with("variability_")) %>% 
+  left_join(result1,by=c("IDrow")) %>%
+  left_join(result2,by=c("IDrow","type")) %>% 
+  left_join(result3,by=c("IDrow","type")) %>% 
+  select(-IDrow)
+                      
+                    
+
+ggplot(result,
+       aes(x=sizepatch, y=ntype,fill=type, alpha=abs(meantype)/100))+
+  geom_bar(stat="identity")+
+  facet_grid(rows=vars(reach),cols=vars(zone))+
+  scale_fill_manual(values=c("red","black","green"))
+
+truc=result %>%
+  sf::st_drop_geometry() %>%
+  mutate(bid=paste(reach,zone,sizepatch,sep="-")) %>%
+  select(bid,type,ntype) %>% 
+  tidyr::pivot_wider(names_from=type,values_from=ntype)%>%
+  column_to_rownames("bid") 
+test=chisq.test(truc)
+test$stdres
 ```

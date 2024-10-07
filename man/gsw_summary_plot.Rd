@@ -4,7 +4,7 @@
 \alias{gsw_summary_plot}
 \title{Plot gsw_summary}
 \usage{
-gsw_summary_plot(gws_summary_result)
+gsw_summary_plot(gsw_summary_result)
 }
 \arguments{
 \item{gsw_summary_result}{result of gsw_summary(city)}

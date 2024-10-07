@@ -5,13 +5,13 @@
 #' @export
 gsw_extract_pixels=function(thisCityCode,dir_images="data-raw/images"){
   table_polygones=study_areas %>%
-    filter(CityCode==thisCityCode) %>%
-    mutate(npol=1:dplyr::n()) %>%
-    group_by(npol,CityCode,reach,zone) %>%
+    dplyr::filter(CityCode==thisCityCode) %>%
+    dplyr::mutate(npol=1:dplyr::n()) %>%
+    dplyr::group_by(npol,CityCode,reach,zone) %>%
     tidyr::nest()
   # Get change and entropy rasters
-  raster_image_1 <- rast(glue::glue("{dir_images}/change_{thisCityCode}.tif"))
-  raster_image_2 <- rast(glue::glue("{dir_images}/entropy9_{thisCityCode}.tif"))
+  raster_image_1 <- terra::rast(glue::glue("{dir_images}/change_{thisCityCode}.tif"))
+  raster_image_2 <- terra::rast(glue::glue("{dir_images}/entropy9_{thisCityCode}.tif"))
   # Define mask based of values of raster_image_1
   mask_raster <- raster_image_1 >= 0 & raster_image_1 <= 200
 
