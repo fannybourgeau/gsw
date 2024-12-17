@@ -9,9 +9,9 @@ gsw_extract_pixels=function(thisCityCode,dir_images="data-raw/images"){
     dplyr::mutate(npol=1:dplyr::n()) %>%
     dplyr::group_by(npol,CityCode,reach,zone) %>%
     tidyr::nest()
-  # Get change and entropy rasters
+  # Get change raster
   raster_image_1 <- terra::rast(glue::glue("{dir_images}/change_{thisCityCode}.tif"))
-  raster_image_2 <- terra::rast(glue::glue("{dir_images}/entropy9_{thisCityCode}.tif"))
+ 
   # Define mask based of values of raster_image_1
   mask_raster <- raster_image_1 >= 0 & raster_image_1 <= 200
 
@@ -26,15 +26,12 @@ gsw_extract_pixels=function(thisCityCode,dir_images="data-raw/images"){
   }
   extract_values_in_polygon <- function(polygon_intersection,
                                         raster_image_1,
-                                        raster_image_2,
                                         n=1000) {
 
     sf::sf_use_s2(FALSE)
     pol=vect(polygon_intersection)
     values_1 <- terra::extract(raster_image_1, pol)
-    values_2 <- terra::extract(raster_image_2, pol)
-    points_df=tibble::tibble(change = values_1[, 2],
-                             entropy=values_2[, 2])
+    points_df=tibble::tibble(change = values_1[, 2])
     return(points_df)
   }
   result=table_polygones %>%
@@ -45,8 +42,7 @@ gsw_extract_pixels=function(thisCityCode,dir_images="data-raw/images"){
            area_intersect=purrr::map_dbl(intersect,~sum(as.numeric(st_area(.x))))) %>%
     mutate(data=purrr::map(.x=intersect,
                            .f=extract_values_in_polygon,
-                           raster_image_1=raster_image_1,
-                           raster_image_2=raster_image_2)) %>%
+                           raster_image_1=raster_image_1)) %>%
     mutate(n=purrr::map_dbl(data,nrow)) %>%
     filter(n>0) %>%
     mutate(data=purrr::map(data,sample_n,size=1000,replace=TRUE)) %>%
